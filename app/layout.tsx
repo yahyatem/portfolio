@@ -17,10 +17,17 @@ const geistMono = Geist_Mono({
 const ogDescription =
   "Je crée des sites web modernes, rapides et performants. Découvrez mon portfolio.";
 
+/** Valeur du champ `content` du tag meta Search Console (méthode « balise HTML »). */
+const googleSiteVerification =
+  process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION?.trim();
+
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: "Yahya Temouch - Développeur Web",
   description: ogDescription,
+  ...(googleSiteVerification
+    ? { verification: { google: googleSiteVerification } }
+    : {}),
   openGraph: {
     title: "Yahya Temouch - Développeur Web",
     description: ogDescription,
