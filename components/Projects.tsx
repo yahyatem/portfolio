@@ -1,96 +1,228 @@
 "use client";
 
-import { motion } from "framer-motion";
 import Image from "next/image";
-import { useMemo, useState } from "react";
-import { ScaleHover, Stagger, StaggerItem } from "@/components/Stagger";
+import { useState } from "react";
+import { Stagger, StaggerItem } from "@/components/Stagger";
+import { simpleIconUrl } from "@/lib/simple-icons";
 
-const categories = [
-  "Tous",
-  "Sites Vitrines",
-  "E-commerce",
-  "Applications Web",
-] as const;
-
-type Category = (typeof categories)[number];
+type TechItem = {
+  name: string;
+  slug: string;
+};
 
 type Project = {
+  slug: string;
   title: string;
-  desc: string;
-  category: Exclude<Category, "Tous">;
+  subtitle: string;
+  description: string;
+  role: string;
+  goal: string;
+  featured?: boolean;
+  liveUrl?: string;
   image: string;
-  tags: string[];
-  liveUrl: string;
-  repoUrl: string;
+  features: readonly string[];
+  technologies: readonly TechItem[];
 };
 
 const projects: Project[] = [
   {
-    title: "Site E-commerce",
-    desc: "Boutique en ligne avec panier, tunnel d’achat et gestion des commandes.",
-    category: "E-commerce",
-    image:
-      "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=900&q=80",
-    tags: ["HTML", "CSS", "JavaScript", "PHP", "MySQL"],
-    liveUrl: "https://example.org",
-    repoUrl: "https://github.com",
+    slug: "snackfquick",
+    title: "SnackFquick",
+    subtitle: "Restaurant Web Application",
+    description:
+      "Commande en ligne pour restaurant : panier, suivi, admin produits — interface rapide et entièrement responsive.",
+    role: "Développement front-end et architecture avec une approche Backend-as-a-Service.",
+    goal: "Fluidifier l'expérience de commande en ligne et simplifier la gestion opérationnelle.",
+    featured: true,
+    liveUrl: "https://snackfquick.com/",
+    image: "/projects/snackfquick.png",
+    features: [
+      "Système de panier",
+      "Suivi de commande",
+      "Geolocation API pour la livraison",
+      "WhatsApp API pour envoyer les commandes",
+      "Dashboard admin pour le CRUD produits",
+      "Mises à jour en temps réel avec Supabase",
+    ],
+    technologies: [
+      { name: "React", slug: "react" },
+      { name: "Vite", slug: "vite" },
+      { name: "TypeScript", slug: "typescript" },
+      { name: "Tailwind", slug: "tailwindcss" },
+      { name: "Framer", slug: "framer" },
+      { name: "Supabase", slug: "supabase" },
+      { name: "PostgreSQL", slug: "postgresql" },
+      { name: "GitHub", slug: "github" },
+    ],
   },
   {
-    title: "Gestion des Étudiants (CRUD)",
-    desc: "Application web pour enregistrer, modifier et suivre les étudiants.",
-    category: "Applications Web",
-    image:
-      "https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=900&q=80",
-    tags: ["PHP", "MySQL", "Bootstrap", "JavaScript"],
-    liveUrl: "https://example.org",
-    repoUrl: "https://github.com",
+    slug: "solar-smart-integration",
+    title: "Solar Smart Integration",
+    subtitle: "Projet de stage",
+    description:
+      "Application solaire avec suivi des données, dashboard clair et assistant IA pour de meilleures décisions énergétiques.",
+    role: "Développement full-stack avec intégration OpenAI.",
+    goal: "Offrir un pilotage énergétique plus intelligent via un dashboard clair.",
+    image: "/projects/solar-smart.png",
+    features: [
+      "Monitoring intelligent de l'énergie solaire",
+      "Assistant IA avec OpenAI API",
+      "Dashboard responsive",
+      "Gestion de données optimisée",
+      "Interface moderne admin / utilisateur",
+    ],
+    technologies: [
+      { name: "Laravel", slug: "laravel" },
+      { name: "Tailwind", slug: "tailwindcss" },
+      { name: "MySQL", slug: "mysql" },
+      { name: "JavaScript", slug: "javascript" },
+      { name: "OpenAI", slug: "openai" },
+    ],
   },
   {
-    title: "Site Vitrine Restaurant",
-    desc: "Site moderne pour établissement avec présentation du menu et réservation.",
-    category: "Sites Vitrines",
-    image:
-      "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=900&q=80",
-    tags: ["HTML", "CSS", "JavaScript", "Bootstrap"],
-    liveUrl: "https://example.org",
-    repoUrl: "https://github.com",
-  },
-  {
-    title: "Gestion de Tâches",
-    desc: "Organisez vos tâches avec listes, priorités et suivi des statuts.",
-    category: "Applications Web",
-    image:
-      "https://images.unsplash.com/photo-1611224923853-80b023f02d71?w=900&q=80",
-    tags: ["HTML", "CSS", "JavaScript", "PHP"],
-    liveUrl: "https://example.org",
-    repoUrl: "https://github.com",
-  },
-  {
-    title: "Application Météo",
-    desc: "Consultez la météo en temps réel avec recherche par ville.",
-    category: "Applications Web",
-    image:
-      "https://images.unsplash.com/photo-1504608524841-42fe6f032db4?w=900&q=80",
-    tags: ["HTML", "CSS", "JavaScript", "API"],
-    liveUrl: "https://example.org",
-    repoUrl: "https://github.com",
-  },
-  {
-    title: "Blog Personnel",
-    desc: "Blog responsive pour publier articles et tutoriels avec une lecture agréable.",
-    category: "Sites Vitrines",
-    image:
-      "https://images.unsplash.com/photo-1499750310107-5fef28a66643?w=900&q=80",
-    tags: ["HTML", "CSS", "PHP", "Bootstrap"],
-    liveUrl: "https://example.org",
-    repoUrl: "https://github.com",
+    slug: "parfumerie-pk",
+    title: "Parfumerie PK",
+    subtitle: "E-commerce Web Application",
+    description:
+      "Boutique en ligne : catalogue, panier, favoris, offres et back-office — stack Next.js & Supabase.",
+    role: "Développement full-stack avec Next.js et Supabase.",
+    goal: "Construire une base e-commerce robuste, sécurisée et évolutive.",
+    image: "/projects/parfumerie-pk.png",
+    features: [
+      "CRUD produits, catégories, marques et offres",
+      "Panier dynamique",
+      "Système de favoris",
+      "Filtrage par catégorie et marque",
+      "Offres dynamiques configurables par l'admin",
+      "Upload images avec Supabase Storage",
+      "Authentification admin / utilisateurs",
+      "Row Level Security (RLS)",
+    ],
+    technologies: [
+      { name: "Next.js", slug: "nextdotjs" },
+      { name: "React", slug: "react" },
+      { name: "TypeScript", slug: "typescript" },
+      { name: "Tailwind", slug: "tailwindcss" },
+      { name: "Supabase", slug: "supabase" },
+      { name: "PostgreSQL", slug: "postgresql" },
+      { name: "GitHub", slug: "github" },
+    ],
   },
 ];
 
-const glass =
-  "rounded-2xl border border-white/10 bg-white/[0.05] shadow-[0_0_40px_-16px_rgba(139,92,246,0.35)] backdrop-blur-xl";
+const cardSurface =
+  "rounded-2xl border border-violet-500/20 bg-[#0c0c12]/90 shadow-[0_18px_50px_-28px_rgba(0,0,0,0.9),0_0_0_1px_rgba(139,92,246,0.12),0_0_40px_-20px_rgba(139,92,246,0.22)] backdrop-blur-xl transition-all duration-300 ease-out hover:-translate-y-2 hover:border-violet-400/45 hover:shadow-[0_28px_60px_-32px_rgba(0,0,0,0.85),0_0_0_1px_rgba(167,139,250,0.35),0_0_56px_-18px_rgba(139,92,246,0.55)]";
+
+function TechBadge({ tech }: { tech: TechItem }) {
+  return (
+    <span className="inline-flex items-center gap-1.5 rounded-full border border-white/[0.09] bg-white/[0.04] py-1 pl-1.5 pr-2.5 ring-1 ring-inset ring-white/[0.04]">
+      {/* eslint-disable-next-line @next/next/no-img-element -- Simple Icons SVG */}
+      <img
+        src={simpleIconUrl(tech.slug)}
+        alt=""
+        width={14}
+        height={14}
+        className="h-3.5 w-3.5 shrink-0 object-contain brightness-0 invert opacity-90"
+      />
+      <span className="text-[11px] font-medium tracking-tight text-zinc-300">
+        {tech.name}
+      </span>
+    </span>
+  );
+}
+
+function SparkIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      className={className}
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+      strokeWidth={1.6}
+      aria-hidden
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09Z"
+      />
+    </svg>
+  );
+}
+
+function ArrowRightIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      className={className}
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+      strokeWidth={2}
+      aria-hidden
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"
+      />
+    </svg>
+  );
+}
 
 function ExternalLinkIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      className={className}
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+      strokeWidth={1.6}
+      aria-hidden
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M13.5 6H6.75A2.25 2.25 0 0 0 4.5 8.25v9A2.25 2.25 0 0 0 6.75 19.5h9A2.25 2.25 0 0 0 18 17.25V10.5M10.5 13.5l9-9M14.25 4.5h5.25v5.25"
+      />
+    </svg>
+  );
+}
+
+function CodeIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      className={className}
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+      strokeWidth={1.6}
+      aria-hidden
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M17.25 6.75 22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5 12-4.5-13.5"
+      />
+    </svg>
+  );
+}
+
+function ChevronIcon({ className, open }: { className?: string; open: boolean }) {
+  return (
+    <svg
+      className={`${className ?? ""} transition-transform duration-300 ${open ? "rotate-180" : ""}`}
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+      strokeWidth={2}
+      aria-hidden
+    >
+      <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+    </svg>
+  );
+}
+
+function LayoutPreviewIcon({ className }: { className?: string }) {
   return (
     <svg
       className={className}
@@ -103,37 +235,63 @@ function ExternalLinkIcon({ className }: { className?: string }) {
       <path
         strokeLinecap="round"
         strokeLinejoin="round"
-        d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5M8.25 15L21 2.25M15 2.25h6v6"
+        d="M3.75 6A2.25 2.25 0 016 3.75h12A2.25 2.25 0 0120.25 6v12A2.25 2.25 0 0118 20.25H6A2.25 2.25 0 013.75 18V6zM9 3.75v16.5M3.75 9h16.5"
       />
     </svg>
   );
 }
 
-function GitHubIcon({ className }: { className?: string }) {
+function ImagePlaceholder({ title }: { title: string }) {
   return (
-    <svg
-      className={className}
-      viewBox="0 0 24 24"
-      fill="currentColor"
-      aria-hidden
-    >
-      <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z" />
-    </svg>
+    <div className="absolute inset-0 flex flex-col items-center justify-center gap-2.5 bg-gradient-to-br from-violet-950/95 via-[#100818] to-fuchsia-950/80 px-4 text-center">
+      <div className="flex h-11 w-11 items-center justify-center rounded-xl border border-violet-500/35 bg-violet-500/15 text-violet-200 shadow-[0_0_24px_-8px_rgba(139,92,246,0.5)]">
+        <LayoutPreviewIcon className="h-5 w-5" />
+      </div>
+      <p className="max-w-[14rem] text-sm font-semibold leading-snug text-white">
+        {title}
+      </p>
+      <p className="text-[11px] text-violet-300/70">Aperçu à venir</p>
+    </div>
+  );
+}
+
+function ProjectPreviewImage({
+  title,
+  src,
+}: {
+  title: string;
+  src: string;
+}) {
+  const [broken, setBroken] = useState(false);
+
+  return (
+    <div className="relative h-[200px] w-full shrink-0 overflow-hidden rounded-t-2xl border-b border-white/10 md:h-[220px]">
+      {broken ? (
+        <ImagePlaceholder title={title} />
+      ) : (
+        <>
+          <Image
+            src={src}
+            alt={`Aperçu du projet ${title}`}
+            fill
+            className="object-cover brightness-[1.08] contrast-[1.06] saturate-[1.03] transition duration-500 ease-out will-change-transform group-hover:scale-[1.06] group-hover:brightness-[1.12] group-hover:contrast-[1.08]"
+            sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 360px"
+            onError={() => setBroken(true)}
+          />
+          <div className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100 bg-gradient-to-t from-violet-600/25 via-fuchsia-500/10 to-transparent" />
+        </>
+      )}
+    </div>
   );
 }
 
 export function Projects() {
-  const [filter, setFilter] = useState<Category>("Tous");
-
-  const filtered = useMemo(() => {
-    if (filter === "Tous") return projects;
-    return projects.filter((p) => p.category === filter);
-  }, [filter]);
+  const [openProject, setOpenProject] = useState<string | null>(null);
 
   return (
     <section id="projets" className="scroll-mt-24 px-4 py-20 md:px-6 md:py-28">
       <div className="mx-auto max-w-6xl">
-        <div className="relative mb-10 text-center md:mb-12">
+        <div className="relative mb-12 text-center md:mb-14">
           <div
             className="pointer-events-none absolute -top-8 left-1/2 h-32 w-64 -translate-x-1/2 rounded-full bg-violet-600/20 blur-[80px]"
             aria-hidden
@@ -148,105 +306,156 @@ export function Projects() {
             </span>
           </h2>
           <p className="relative mx-auto mt-4 max-w-2xl text-base leading-relaxed text-zinc-400 md:text-lg">
-            Voici quelques projets que j&apos;ai réalisés avec passion pour créer
-            des solutions modernes et efficaces.
+            Sélection de réalisations freelance — UX soignée, stack moderne,
+            livrables orientés impact.
           </p>
         </div>
 
-        <div className="mb-10 flex flex-wrap justify-center gap-2">
-          {categories.map((cat) => (
-            <motion.button
-              key={cat}
-              type="button"
-              onClick={() => setFilter(cat)}
-              whileHover={{ scale: 1.06 }}
-              whileTap={{ scale: 0.96 }}
-              transition={{ type: "spring", stiffness: 450, damping: 22 }}
-              className={`rounded-full px-4 py-2 text-sm font-medium transition duration-300 ${
-                filter === cat
-                  ? "bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white shadow-[0_0_28px_-6px_rgba(139,92,246,0.6)]"
-                  : "border border-white/10 bg-white/5 text-zinc-400 hover:border-violet-500/30 hover:text-white"
-              }`}
-            >
-              {cat}
-            </motion.button>
-          ))}
-        </div>
-
-        <Stagger className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {filtered.map((project) => (
-            <StaggerItem key={project.title}>
-              <ScaleHover scale={1.02}>
+        <Stagger className="grid gap-7 md:grid-cols-2 md:gap-8 xl:grid-cols-3 xl:gap-8">
+          {projects.map((project) => {
+            const isOpen = openProject === project.slug;
+            const isFeatured = Boolean(project.featured);
+            return (
+              <StaggerItem key={project.slug} className="h-full">
                 <article
-                  className={`group flex h-full flex-col overflow-hidden transition duration-300 ease-out ${glass} hover:border-violet-500/25 hover:shadow-[0_0_52px_-14px_rgba(139,92,246,0.45)]`}
+                  className={`group relative flex h-full min-h-0 flex-col overflow-hidden ${cardSurface} ${
+                    isFeatured
+                      ? "border-violet-400/40 shadow-[0_22px_60px_-28px_rgba(0,0,0,0.88),0_0_0_1px_rgba(192,38,211,0.25),0_0_56px_-18px_rgba(139,92,246,0.45)]"
+                      : ""
+                  }`}
                 >
-              <div className="relative aspect-[16/10] overflow-hidden">
-                <Image
-                  src={project.image}
-                  alt={project.title}
-                  fill
-                  className="object-cover transition duration-500 ease-out will-change-transform group-hover:scale-110"
-                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#0b0b0f]/90 via-[#0b0b0f]/25 to-transparent transition duration-300 group-hover:from-[#0b0b0f]/80" />
-                <span className="absolute left-3 top-3 rounded-full border border-white/15 bg-black/45 px-3 py-1 text-xs font-medium text-violet-200 backdrop-blur-md">
-                  {project.category}
-                </span>
-              </div>
+                  <ProjectPreviewImage title={project.title} src={project.image} />
+                  <div
+                    className={`pointer-events-none absolute left-0 right-0 top-0 z-10 h-1 bg-gradient-to-r ${
+                      isFeatured
+                        ? "from-fuchsia-400 via-violet-400 to-fuchsia-500"
+                        : "from-violet-500/90 via-fuchsia-500/70 to-transparent"
+                    }`}
+                    aria-hidden
+                  />
 
-              <div className="flex flex-1 flex-col p-5">
-                <div className="flex items-start justify-between gap-3">
-                  <h3 className="text-lg font-semibold leading-snug text-white transition group-hover:text-violet-100">
-                    {project.title}
-                  </h3>
-                  <a
-                    href={project.liveUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="mt-0.5 shrink-0 rounded-lg border border-white/10 bg-white/5 p-1.5 text-zinc-400 transition hover:border-violet-500/40 hover:bg-violet-500/15 hover:text-violet-200"
-                    aria-label={`Ouvrir ${project.title} dans un nouvel onglet`}
-                  >
-                    <ExternalLinkIcon className="h-4 w-4" />
-                  </a>
-                </div>
-                <p className="mt-2 flex-1 text-sm leading-relaxed text-zinc-400">
-                  {project.desc}
-                </p>
-                <div className="mt-4 flex flex-wrap gap-2">
-                  {project.tags.map((tag) => (
-                    <span
-                      key={tag}
-                      className="rounded-md border border-white/10 bg-zinc-900/80 px-2 py-0.5 text-xs font-medium text-zinc-300"
+                  <div className="flex flex-1 flex-col p-6">
+                    <div className="mb-4 flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <h3 className="text-lg font-bold tracking-tight text-white md:text-xl">
+                          {project.title}
+                        </h3>
+                        <p className="mt-1 text-xs font-semibold uppercase tracking-[0.14em] text-violet-400/95">
+                          {project.subtitle}
+                        </p>
+                      </div>
+                      {isFeatured ? (
+                        <span className="inline-flex shrink-0 items-center gap-1 rounded-full border border-fuchsia-400/35 bg-fuchsia-500/15 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-fuchsia-200">
+                          <SparkIcon className="h-3 w-3" />
+                          Featured
+                        </span>
+                      ) : null}
+                    </div>
+
+                    <p className="flex-1 text-sm leading-relaxed text-zinc-400">
+                      {project.description}
+                    </p>
+
+                    <div className="mt-5 flex flex-wrap gap-2">
+                      {project.technologies.map((tech) => (
+                        <TechBadge key={`${project.slug}-${tech.slug}`} tech={tech} />
+                      ))}
+                    </div>
+
+                    <div className="mt-6 mt-auto border-t border-white/10 pt-5">
+                      {project.liveUrl ? (
+                        <a
+                          href={project.liveUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="group/btn inline-flex w-full items-center justify-center gap-2 rounded-xl border border-violet-500/40 bg-gradient-to-r from-violet-600/25 to-fuchsia-600/20 px-4 py-3 text-sm font-semibold text-violet-50 shadow-[0_0_28px_-10px_rgba(139,92,246,0.55)] transition hover:border-violet-400/60 hover:from-violet-500/35 hover:to-fuchsia-500/25"
+                        >
+                          <ExternalLinkIcon className="h-4 w-4 opacity-90" />
+                          Voir le projet
+                          <ArrowRightIcon className="h-4 w-4 opacity-80 transition-transform group-hover/btn:translate-x-0.5" />
+                        </a>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setOpenProject((prev) =>
+                              prev === project.slug ? null : project.slug,
+                            )
+                          }
+                          className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-white/[0.12] bg-white/[0.05] px-4 py-3 text-sm font-semibold text-zinc-100 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.06)] transition hover:border-violet-400/45 hover:bg-violet-500/10"
+                          aria-expanded={isOpen}
+                        >
+                          <CodeIcon className="h-4 w-4" />
+                          Découvrir le projet
+                          <ChevronIcon className="h-4 w-4 text-zinc-500" open={isOpen} />
+                        </button>
+                      )}
+                    </div>
+                  </div>
+
+                  {!project.liveUrl ? (
+                    <div
+                      className={`grid transition-[grid-template-rows] duration-300 ease-out ${
+                        isOpen ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
+                      }`}
                     >
-                      {tag}
-                    </span>
-                  ))}
-                </div>
-                <div className="mt-5 flex flex-wrap gap-3 border-t border-white/10 pt-4">
-                  <a
-                    href={project.liveUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex flex-1 items-center justify-center gap-2 rounded-xl border border-violet-500/35 bg-violet-500/10 px-3 py-2.5 text-sm font-medium text-violet-100 transition hover:border-violet-400/50 hover:bg-violet-500/20 sm:flex-initial"
-                  >
-                    <ExternalLinkIcon className="h-4 w-4" />
-                    Voir le site
-                  </a>
-                  <a
-                    href={project.repoUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex flex-1 items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.06] px-3 py-2.5 text-sm font-medium text-zinc-200 transition hover:border-white/20 hover:bg-white/10 sm:flex-initial"
-                  >
-                    <GitHubIcon className="h-4 w-4" />
-                    Code source
-                  </a>
-                </div>
-              </div>
+                      <div className="overflow-hidden">
+                        <div className="border-t border-white/10 bg-[#0a0a10]/85 p-6 backdrop-blur-md">
+                          <div className="grid gap-5">
+                            <div>
+                              <p className="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-violet-300/90">
+                                Objectif
+                              </p>
+                              <p className="text-sm leading-relaxed text-zinc-300">
+                                {project.goal}
+                              </p>
+                            </div>
+                            <div>
+                              <p className="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-violet-300/90">
+                                Rôle
+                              </p>
+                              <p className="text-sm leading-relaxed text-zinc-300">
+                                {project.role}
+                              </p>
+                            </div>
+                            <div>
+                              <p className="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-violet-300/90">
+                                Features
+                              </p>
+                              <ul className="space-y-2">
+                                {project.features.map((feature) => (
+                                  <li key={feature} className="flex gap-2.5 text-sm text-zinc-300">
+                                    <span
+                                      className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-gradient-to-r from-violet-400 to-fuchsia-500"
+                                      aria-hidden
+                                    />
+                                    <span>{feature}</span>
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                            <div>
+                              <p className="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-violet-300/90">
+                                Stack
+                              </p>
+                              <div className="flex flex-wrap gap-2">
+                                {project.technologies.map((tech) => (
+                                  <TechBadge
+                                    key={`${project.slug}-detail-${tech.slug}`}
+                                    tech={tech}
+                                  />
+                                ))}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ) : null}
                 </article>
-              </ScaleHover>
-            </StaggerItem>
-          ))}
+              </StaggerItem>
+            );
+          })}
         </Stagger>
       </div>
     </section>

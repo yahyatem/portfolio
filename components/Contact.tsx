@@ -3,7 +3,14 @@
 import { motion } from "framer-motion";
 import { useState } from "react";
 import type { FormEvent, ReactNode } from "react";
+import {
+  EMAILJS_PUBLIC_KEY,
+  EMAILJS_SERVICE_ID,
+  EMAILJS_TEMPLATE_ID,
+} from "@/lib/emailjs-config";
 import { primaryGlowKeyframes } from "@/lib/motion";
+
+const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 const glass =
   "rounded-3xl border border-white/10 bg-white/[0.05] shadow-[0_0_45px_-18px_rgba(139,92,246,0.38)] backdrop-blur-xl";
@@ -35,13 +42,55 @@ function FieldIcon({ children }: { children: ReactNode }) {
 }
 
 export function Contact() {
-  const [sent, setSent] = useState(false);
   const [openFaq, setOpenFaq] = useState<number | null>(0);
+  const [isSending, setIsSending] = useState(false);
+  const [success, setSuccess] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  function handleSubmit(e: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    setSent(true);
-    window.setTimeout(() => setSent(false), 4000);
+    setError(null);
+    setSuccess(false);
+
+    const form = e.currentTarget;
+    const fd = new FormData(form);
+    const name = String(fd.get("name") ?? "").trim();
+    const emailRaw = String(fd.get("email") ?? "").trim();
+    const subject = String(fd.get("subject") ?? "").trim();
+    const message = String(fd.get("message") ?? "").trim();
+
+    if (!name || !emailRaw || !subject || !message) {
+      setError("Veuillez remplir tous les champs obligatoires.");
+      return;
+    }
+    if (!emailRegex.test(emailRaw)) {
+      setError("Adresse e-mail invalide.");
+      return;
+    }
+
+    setIsSending(true);
+    try {
+      const emailjs = (await import("@emailjs/browser")).default;
+      await emailjs.send(
+        EMAILJS_SERVICE_ID,
+        EMAILJS_TEMPLATE_ID,
+        {
+          name,
+          email: emailRaw,
+          subject,
+          message,
+        },
+        EMAILJS_PUBLIC_KEY,
+      );
+      setSuccess(true);
+      form.reset();
+      window.setTimeout(() => setSuccess(false), 8000);
+    } catch (err) {
+      console.error("[EmailJS]", err);
+      setError("Erreur lors de l'envoi. Réessayez.");
+    } finally {
+      setIsSending(false);
+    }
   }
 
   return (
@@ -68,7 +117,12 @@ export function Contact() {
             <h3 className="mb-6 text-lg font-semibold text-white">
               Envoyez-moi un message
             </h3>
-            <form className="space-y-5" onSubmit={handleSubmit}>
+            <form
+              className="space-y-5"
+              onSubmit={handleSubmit}
+              aria-busy={isSending}
+              noValidate
+            >
               <div className="grid gap-5 sm:grid-cols-2">
                 <div>
                   <label
@@ -169,6 +223,8 @@ export function Contact() {
                     id="contact-subject"
                     name="subject"
                     type="text"
+                    required
+                    minLength={2}
                     className={`${inputBase} pl-10 pr-4`}
                     placeholder="Sujet de votre message"
                   />
@@ -210,10 +266,16 @@ export function Contact() {
               </div>
               <motion.button
                 type="submit"
-                className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-violet-600 to-fuchsia-600 py-3.5 text-sm font-semibold text-white"
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                animate={{ boxShadow: [...primaryGlowKeyframes] }}
+                disabled={isSending}
+                aria-busy={isSending}
+                className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-violet-600 to-fuchsia-600 py-3.5 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-75"
+                whileHover={isSending ? undefined : { scale: 1.02 }}
+                whileTap={isSending ? undefined : { scale: 0.98 }}
+                animate={
+                  isSending
+                    ? undefined
+                    : { boxShadow: [...primaryGlowKeyframes] }
+                }
                 transition={{
                   boxShadow: {
                     duration: 2.4,
@@ -222,26 +284,61 @@ export function Contact() {
                   },
                 }}
               >
-                <svg
-                  className="h-4 w-4"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  strokeWidth={2}
-                  aria-hidden
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5"
-                  />
-                </svg>
-                Envoyer
+                {isSending ? (
+                  <>
+                    <svg
+                      className="h-4 w-4 animate-spin"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      aria-hidden
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      />
+                      <path
+                        className="opacity-90"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                      />
+                    </svg>
+                    Envoi...
+                  </>
+                ) : (
+                  <>
+                    <svg
+                      className="h-4 w-4"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      strokeWidth={2}
+                      aria-hidden
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5"
+                      />
+                    </svg>
+                    Envoyer
+                  </>
+                )}
               </motion.button>
-              {sent ? (
-                <p className="text-sm text-violet-300 [animation:fade-in_0.4s_ease-out]">
-                  Message envoyé — merci ! (démo front-end, non connecté à un
-                  serveur.)
+              {error ? (
+                <p
+                  role="alert"
+                  className="text-sm leading-relaxed text-rose-300 [animation:fade-in_0.35s_ease-out]"
+                >
+                  {error}
+                </p>
+              ) : null}
+              {success ? (
+                <p className="text-sm leading-relaxed text-emerald-400/95 [animation:fade-in_0.4s_ease-out]">
+                  Message envoyé avec succès ✅
                 </p>
               ) : null}
             </form>
@@ -279,10 +376,10 @@ export function Contact() {
                     Email
                   </p>
                   <a
-                    href="mailto:hello@yahya.dev"
+                    href="mailto:yahyatemouch10@gmail.com"
                     className="font-medium text-zinc-100 transition hover:text-violet-300"
                   >
-                    hello@yahya.dev
+                    yahyatemouch10@gmail.com
                   </a>
                 </div>
                 <span className="hidden shrink-0 text-xs text-violet-400/90 sm:inline">
@@ -311,10 +408,10 @@ export function Contact() {
                     Téléphone
                   </p>
                   <a
-                    href="tel:+212612345678"
+                    href="tel:+212609560141"
                     className="font-medium text-zinc-100 transition hover:text-fuchsia-300"
                   >
-                    +212 6 12 34 56 78
+                    +212609560141
                   </a>
                 </div>
                 <span className="hidden shrink-0 text-xs text-zinc-500 sm:inline">
@@ -337,12 +434,12 @@ export function Contact() {
                     WhatsApp
                   </p>
                   <a
-                    href="https://wa.me/212612345678"
+                    href="https://wa.me/212609560141"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="font-medium text-zinc-100 transition hover:text-emerald-300"
                   >
-                    Discuter sur WhatsApp
+                    +212609560141
                   </a>
                 </div>
                 <span className="hidden shrink-0 text-xs text-emerald-400/90 sm:inline">
@@ -375,17 +472,54 @@ export function Contact() {
                   <p className="text-xs font-medium uppercase tracking-wider text-zinc-500">
                     Localisation
                   </p>
-                  <p className="font-medium text-zinc-100">
-                    Casablanca, Maroc
+                  <a
+                    href="https://maps.google.com/?q=F%C3%A8s%2C%20Morocco"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="font-medium text-zinc-100 transition hover:text-violet-300"
+                  >
+                    Fès, Morocco
+                  </a>
+                  <p className="text-xs text-zinc-500">
+                    Freelance Web Developer — Available for projects
                   </p>
-                  <p className="text-xs text-zinc-500">Projets en remote possible</p>
                 </div>
               </li>
             </ul>
+            <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+              <p className="text-xs font-medium uppercase tracking-wider text-zinc-500">
+                Réseaux sociaux
+              </p>
+              <div className="mt-3 flex flex-wrap gap-2">
+                <a
+                  href="https://github.com/yahyatem"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="rounded-lg border border-white/10 bg-white/[0.04] px-3 py-1.5 text-sm text-zinc-200 transition hover:border-violet-400/40 hover:text-violet-200"
+                >
+                  GitHub
+                </a>
+                <a
+                  href="https://www.linkedin.com/in/yahya-temouch-73936232a"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="rounded-lg border border-white/10 bg-white/[0.04] px-3 py-1.5 text-sm text-zinc-200 transition hover:border-violet-400/40 hover:text-violet-200"
+                >
+                  LinkedIn
+                </a>
+                <a
+                  href="https://www.instagram.com/yayatem_10/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="rounded-lg border border-white/10 bg-white/[0.04] px-3 py-1.5 text-sm text-zinc-200 transition hover:border-violet-400/40 hover:text-violet-200"
+                >
+                  Instagram
+                </a>
+              </div>
+            </div>
           </aside>
         </div>
 
-        {/* Map placeholder */}
         <div className="relative mt-14 overflow-hidden rounded-3xl border border-white/10 bg-[#0d0d12] shadow-[0_0_50px_-20px_rgba(139,92,246,0.35)] md:mt-20">
           <div
             className="absolute inset-0 opacity-40"
@@ -424,11 +558,7 @@ export function Contact() {
               <span className="absolute -bottom-1 left-1/2 h-3 w-3 -translate-x-1/2 rounded-full bg-violet-500/60 blur-sm" />
             </div>
             <p className="text-center text-sm font-medium text-zinc-300">
-              Carte — Casablanca, Maroc
-            </p>
-            <p className="max-w-md text-center text-xs text-zinc-500">
-              Emplacement indicatif. Remplacez ce bloc par une carte Google Maps
-              ou OpenStreetMap lors du déploiement.
+              Fès, Morocco
             </p>
           </div>
         </div>
